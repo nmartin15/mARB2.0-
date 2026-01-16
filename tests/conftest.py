@@ -1,5 +1,7 @@
 """Pytest configuration and shared fixtures."""
 import os
+import secrets
+import string
 from typing import AsyncGenerator, Generator
 from unittest.mock import MagicMock, patch
 
@@ -23,10 +25,17 @@ os.environ.setdefault("REDIS_PORT", "6379")
 os.environ.setdefault("REDIS_DB", "0")
 # Set security settings defaults for testing
 # Use high-entropy keys that pass validation
-# JWT secret: 32+ characters with high entropy
-os.environ.setdefault("JWT_SECRET_KEY", "REMOVED_SECRET_FROM_HISTORY")
-# Encryption key: exactly 32 characters with high entropy
-os.environ.setdefault("ENCRYPTION_KEY", "aB3dE5fG7hI9jK1lM3nO5pQ7rS9tU1vW")
+# IMPORTANT: These are test-only keys. Production must use environment variables.
+# JWT secret: 32+ characters with high entropy (generated at runtime for tests)
+if "JWT_SECRET_KEY" not in os.environ:
+    # Generate a random test key (64 chars for high entropy)
+    test_jwt_key = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(64))
+    os.environ["JWT_SECRET_KEY"] = test_jwt_key
+# Encryption key: exactly 32 characters with high entropy (generated at runtime for tests)
+if "ENCRYPTION_KEY" not in os.environ:
+    # Generate a random test key (32 chars)
+    test_encryption_key = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
+    os.environ["ENCRYPTION_KEY"] = test_encryption_key
 os.environ.setdefault("CORS_ORIGINS", "http://localhost:3000")
 os.environ.setdefault("REQUIRE_AUTH", "false")  # Disable auth for tests
 
