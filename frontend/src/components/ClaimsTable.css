@@ -1,0 +1,123 @@
+.claims-table-container {
+  overflow-x: auto;
+}
+
+.claims-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.claims-table thead {
+  background-color: #667eea;
+  color: white;
+}
+
+.claims-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.claims-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.claims-table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.status-pending {
+  background-color: #ff9800;
+  color: white;
+}
+
+.status-processed {
+  background-color: #4caf50;
+  color: white;
+}
+
+.status-denied {
+  background-color: #f44336;
+  color: white;
+}
+
+.status-unknown {
+  background-color: #9e9e9e;
+  color: white;
+}
+
+.risk-score {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.risk-low {
+  color: #4caf50;
+}
+
+.risk-medium {
+  color: #ff9800;
+}
+
+.risk-high {
+  color: #f44336;
+}
+
+.risk-critical {
+  color: #9c27b0;
+}
+
+.risk-unknown {
+  color: #9e9e9e;
+}
+
+.risk-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.risk-badge.risk-low {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.risk-badge.risk-medium {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.risk-badge.risk-high {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.risk-badge.risk-critical {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
+.risk-badge.risk-unknown {
+  background-color: #f5f5f5;
+  color: #616161;
+}
+
+.loading,
+.no-claims {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+

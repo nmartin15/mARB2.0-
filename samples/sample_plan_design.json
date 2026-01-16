@@ -1,0 +1,419 @@
+{
+  "$schema": "./plan_design_schema.json",
+  "plan_name": "Blue Cross Blue Shield PPO Gold Plan",
+  "plan_type": "PPO",
+  "effective_date": "2024-01-01",
+  "termination_date": "2024-12-31",
+  "deductibles": {
+    "individual": {
+      "in_network": 1500.00,
+      "out_of_network": 3000.00,
+      "applies_to": ["medical", "pharmacy"]
+    },
+    "family": {
+      "in_network": 3000.00,
+      "out_of_network": 6000.00,
+      "applies_to": ["medical", "pharmacy"]
+    },
+    "embedded": true,
+    "carry_over": false
+  },
+  "out_of_pocket_maximums": {
+    "individual": {
+      "in_network": 5000.00,
+      "out_of_network": 10000.00
+    },
+    "family": {
+      "in_network": 10000.00,
+      "out_of_network": 20000.00
+    },
+    "includes_deductible": true
+  },
+  "copays": {
+    "primary_care_visit": {
+      "in_network": 25.00,
+      "out_of_network": 50.00,
+      "applies_after_deductible": false
+    },
+    "specialist_visit": {
+      "in_network": 50.00,
+      "out_of_network": 100.00,
+      "applies_after_deductible": false
+    },
+    "urgent_care": {
+      "in_network": 75.00,
+      "out_of_network": 150.00,
+      "applies_after_deductible": false
+    },
+    "emergency_room": {
+      "in_network": 250.00,
+      "out_of_network": 500.00,
+      "applies_after_deductible": false,
+      "waived_if_admitted": true
+    },
+    "pharmacy": {
+      "generic": {
+        "in_network": 10.00,
+        "out_of_network": 20.00
+      },
+      "preferred_brand": {
+        "in_network": 40.00,
+        "out_of_network": 80.00
+      },
+      "non_preferred_brand": {
+        "in_network": 60.00,
+        "out_of_network": 120.00
+      },
+      "specialty": {
+        "in_network": 100.00,
+        "out_of_network": 200.00
+      }
+    }
+  },
+  "coinsurance": {
+    "medical": {
+      "in_network": {
+        "percentage": 20,
+        "applies_after_deductible": true
+      },
+      "out_of_network": {
+        "percentage": 40,
+        "applies_after_deductible": true
+      }
+    },
+    "pharmacy": {
+      "in_network": {
+        "percentage": 0,
+        "applies_after_deductible": false
+      },
+      "out_of_network": {
+        "percentage": 50,
+        "applies_after_deductible": true
+      }
+    }
+  },
+  "benefit_limits": {
+    "annual": {
+      "physical_therapy_visits": {
+        "limit": 30,
+        "requires_prior_auth_after": 20
+      },
+      "mental_health_visits": {
+        "limit": 52,
+        "requires_prior_auth_after": 20
+      },
+      "chiropractic_visits": {
+        "limit": 20,
+        "requires_prior_auth_after": 10
+      }
+    },
+    "lifetime": {
+      "organ_transplant": {
+        "limit": 1000000.00,
+        "currency": "USD"
+      },
+      "bariatric_surgery": {
+        "limit": 50000.00,
+        "currency": "USD"
+      }
+    }
+  },
+  "prior_authorization_requirements": {
+    "always_required": [
+      {
+        "service_type": "surgery",
+        "cpt_codes": ["10000-69999"],
+        "description": "All surgical procedures"
+      },
+      {
+        "service_type": "imaging",
+        "cpt_codes": ["70000-79999"],
+        "modalities": ["MRI", "CT", "PET"],
+        "description": "Advanced imaging studies"
+      },
+      {
+        "service_type": "specialty_drugs",
+        "ndc_codes": ["specialty_tier"],
+        "description": "Specialty pharmacy medications"
+      }
+    ],
+    "required_after_visits": {
+      "physical_therapy": {
+        "visits": 20,
+        "description": "PA required after 20 PT visits"
+      },
+      "mental_health": {
+        "visits": 20,
+        "description": "PA required after 20 mental health visits"
+      }
+    },
+    "required_for_amounts": {
+      "durable_medical_equipment": {
+        "amount": 500.00,
+        "description": "PA required for DME over $500"
+      }
+    }
+  },
+  "network_rules": {
+    "in_network": {
+      "discount_applied": true,
+      "coinsurance_percentage": 20,
+      "deductible_applies": true
+    },
+    "out_of_network": {
+      "discount_applied": false,
+      "coinsurance_percentage": 40,
+      "deductible_applies": true,
+      "balance_billing_allowed": true,
+      "max_allowed_amount": "UCR"
+    },
+    "emergency_services": {
+      "always_in_network": true,
+      "description": "Emergency services treated as in-network regardless of provider"
+    }
+  },
+  "coverage_rules": {
+    "preventive_care": {
+      "covered_at_100": true,
+      "applies_to_deductible": false,
+      "services": [
+        "annual_physical",
+        "mammography",
+        "colonoscopy",
+        "vaccinations",
+        "well_woman_exam",
+        "well_child_exam"
+      ]
+    },
+    "maternity": {
+      "covered": true,
+      "copay": 0,
+      "coinsurance": 0,
+      "applies_to_deductible": false,
+      "description": "Maternity services covered at 100%"
+    },
+    "mental_health": {
+      "parity": true,
+      "copay": 50,
+      "coinsurance": 20,
+      "description": "Mental health services with parity to medical benefits"
+    },
+    "substance_abuse": {
+      "parity": true,
+      "copay": 50,
+      "coinsurance": 20,
+      "description": "Substance abuse treatment with parity to medical benefits"
+    }
+  },
+  "exclusions": [
+    {
+      "category": "cosmetic",
+      "description": "Cosmetic procedures not medically necessary",
+      "cpt_codes": ["11950-11954", "15730-15738"]
+    },
+    {
+      "category": "experimental",
+      "description": "Experimental or investigational treatments",
+      "cpt_codes": ["unlisted_procedures"]
+    },
+    {
+      "category": "weight_loss",
+      "description": "Weight loss programs and medications (unless bariatric surgery approved)",
+      "exceptions": ["bariatric_surgery_with_pa"]
+    },
+    {
+      "category": "fertility",
+      "description": "Fertility treatments and IVF",
+      "exceptions": ["diagnostic_testing"]
+    }
+  ],
+  "cpt_code_rules": {
+    "99213": {
+      "description": "Office visit, established patient, level 3",
+      "allowed_amount_in_network": 150.00,
+      "allowed_amount_out_network": 200.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    },
+    "99214": {
+      "description": "Office visit, established patient, level 4",
+      "allowed_amount_in_network": 200.00,
+      "allowed_amount_out_network": 280.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    },
+    "99215": {
+      "description": "Office visit, established patient, level 5",
+      "allowed_amount_in_network": 300.00,
+      "allowed_amount_out_network": 400.00,
+      "requires_prior_auth": true,
+      "frequency_limit": null
+    },
+    "36415": {
+      "description": "Routine venipuncture",
+      "allowed_amount_in_network": 15.00,
+      "allowed_amount_out_network": 20.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    },
+    "80053": {
+      "description": "Comprehensive metabolic panel",
+      "allowed_amount_in_network": 25.00,
+      "allowed_amount_out_network": 35.00,
+      "requires_prior_auth": false,
+      "frequency_limit": {
+        "per_year": 4,
+        "description": "Limited to 4 per calendar year"
+      }
+    },
+    "85025": {
+      "description": "Complete blood count (CBC)",
+      "allowed_amount_in_network": 20.00,
+      "allowed_amount_out_network": 28.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    },
+    "93000": {
+      "description": "Electrocardiogram, routine ECG",
+      "allowed_amount_in_network": 50.00,
+      "allowed_amount_out_network": 70.00,
+      "requires_prior_auth": false,
+      "frequency_limit": {
+        "per_year": 2,
+        "description": "Limited to 2 per calendar year for routine screening"
+      }
+    },
+    "71020": {
+      "description": "Chest X-ray, 2 views",
+      "allowed_amount_in_network": 80.00,
+      "allowed_amount_out_network": 120.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    },
+    "72141": {
+      "description": "MRI brain without contrast",
+      "allowed_amount_in_network": 1200.00,
+      "allowed_amount_out_network": 1800.00,
+      "requires_prior_auth": true,
+      "frequency_limit": {
+        "per_year": 2,
+        "description": "Limited to 2 per calendar year without PA"
+      }
+    },
+    "80061": {
+      "description": "Lipid panel",
+      "allowed_amount_in_network": 25.00,
+      "allowed_amount_out_network": 35.00,
+      "requires_prior_auth": false,
+      "frequency_limit": {
+        "per_year": 1,
+        "description": "Limited to 1 per calendar year for routine screening"
+      }
+    },
+    "80048": {
+      "description": "Basic metabolic panel",
+      "allowed_amount_in_network": 20.00,
+      "allowed_amount_out_network": 28.00,
+      "requires_prior_auth": false,
+      "frequency_limit": null
+    }
+  },
+  "denial_reason_codes": {
+    "OA23": {
+      "code": "OA23",
+      "description": "The impact of a prior payer's payment cannot be determined",
+      "category": "other_adjustment",
+      "action_required": "resubmit_with_additional_info",
+      "appealable": true
+    },
+    "CO45": {
+      "code": "CO45",
+      "description": "Charge exceeds fee schedule/maximum allowable or contracted/legislated fee arrangement",
+      "category": "contractual_obligation",
+      "action_required": "write_off_or_balance_bill",
+      "appealable": false
+    },
+    "CO96": {
+      "code": "CO96",
+      "description": "Non-covered charge(s)",
+      "category": "contractual_obligation",
+      "action_required": "write_off_or_balance_bill",
+      "appealable": true
+    },
+    "CO97": {
+      "code": "CO97",
+      "description": "Benefit maximum has been reached",
+      "category": "contractual_obligation",
+      "action_required": "write_off_or_balance_bill",
+      "appealable": true
+    },
+    "CO253": {
+      "code": "CO253",
+      "description": "Claim/service denied because the patient cannot be identified as eligible with the payer",
+      "category": "contractual_obligation",
+      "action_required": "verify_eligibility",
+      "appealable": false
+    },
+    "PR1": {
+      "code": "PR1",
+      "description": "Deductible Amount",
+      "category": "patient_responsibility",
+      "action_required": "collect_from_patient",
+      "appealable": false
+    },
+    "PR2": {
+      "code": "PR2",
+      "description": "Coinsurance Amount",
+      "category": "patient_responsibility",
+      "action_required": "collect_from_patient",
+      "appealable": false
+    }
+  },
+  "claim_processing_rules": {
+    "timely_filing": {
+      "days": 365,
+      "description": "Claims must be filed within 365 days of date of service"
+    },
+    "coordination_of_benefits": {
+      "primary": true,
+      "secondary_allowed": true,
+      "description": "This plan is primary payer"
+    },
+    "retroactive_authorization": {
+      "allowed": false,
+      "description": "Prior authorization cannot be obtained retroactively"
+    },
+    "claim_edits": {
+      "duplicate_claim_detection": true,
+      "bundling_rules": "CMS",
+      "unbundling_detection": true,
+      "description": "Standard CMS bundling and unbundling rules apply"
+    }
+  },
+  "special_programs": {
+    "disease_management": {
+      "diabetes": {
+        "enrolled": true,
+        "copay_waiver": true,
+        "description": "Diabetes management program with waived copays"
+      },
+      "asthma": {
+        "enrolled": true,
+        "copay_waiver": false,
+        "description": "Asthma management program"
+      }
+    },
+    "value_based_care": {
+      "participating_providers": true,
+      "incentive_programs": true,
+      "description": "Providers may participate in value-based care arrangements"
+    }
+  },
+  "appeals_process": {
+    "internal_appeal_days": 30,
+    "external_appeal_available": true,
+    "expedited_appeal_available": true,
+    "description": "Standard appeal process with 30-day internal review"
+  }
+}
+

@@ -1,0 +1,23 @@
+{
+  "num_episodes": 200,
+  "denial_rate": 0.25,
+  "outcomes": {
+    "denied": 50,
+    "partial": 30,
+    "adjusted": 20,
+    "paid": 100
+  },
+  "specialties": {
+    "urology": 19,
+    "primary_care": 63,
+    "emergency": 31,
+    "cardiology": 27,
+    "orthopedics": 19,
+    "gastroenterology": 18,
+    "oncology": 13,
+    "dermatology": 10
+  },
+  "claims_file": "samples/training/training_837_claims.edi",
+  "remittances_file": "samples/training/training_835_remittances.edi",
+  "generated_at": "2025-12-30T08:50:01.508874"
+}

@@ -1,0 +1,400 @@
+# mARB 2.0 - Cursor Rules
+
+## Environment & Dependencies
+
+### Virtual Environment
+- **Always use** the virtual environment at `venv/` for all Python operations
+- **Python interpreter**: `./venv/bin/python` (Python 3.11+)
+- **Dependencies**: All installed in `venv/` via `requirements.txt`
+- **Activation**: `source venv/bin/activate` (macOS/Linux) or `venv\Scripts\activate` (Windows)
+
+### Package Management
+- **Install new packages**: Add to `requirements.txt` with pinned versions, then `pip install -r requirements.txt`
+- **Format dependencies**: Group by category (Core, Database, ML, etc.) with comments
+- **Version pinning**: Use exact versions (e.g., `fastapi==0.104.1`) for reproducibility
+
+## Code Style & Formatting
+
+### Tools & Configuration
+- **Formatter**: Black (line length: 100, target: Python 3.11)
+- **Linter**: Ruff (line length: 100, select: E, F, I, N, W, ignore: E501)
+- **Style Guide**: PEP 8 with project-specific overrides
+- **Auto-format**: Run `black .` before committing
+- **Lint check**: Run `ruff check .` before committing
+
+### Code Standards
+- **Line length**: Maximum 100 characters (enforced by Black/Ruff)
+- **Imports**: Use absolute imports from `app.*`, group by: stdlib, third-party, local
+- **Type hints**: Required for all function parameters and return types
+- **Docstrings**: Use Google-style docstrings for all public functions, classes, and modules
+- **Naming**: 
+  - Classes: `PascalCase`
+  - Functions/variables: `snake_case`
+  - Constants: `UPPER_SNAKE_CASE`
+  - Private: Prefix with `_` (single) or `__` (name mangling)
+
+## Project Structure
+
+### Directory Organization
+```
+app/              # Main application code
+├── api/          # API routes and middleware
+│   ├── routes/   # Endpoint handlers
+│   └── middleware/ # Request/response middleware
+├── config/       # Configuration modules (database, security, celery, redis)
+├── models/       # SQLAlchemy database models
+├── services/     # Business logic services
+│   ├── edi/      # EDI parsing and processing
+│   ├── episodes/ # Episode linking logic
+│   ├── learning/ # Pattern detection
+│   ├── queue/    # Celery task definitions
+│   └── risk/     # Risk scoring and rules
+└── utils/        # Shared utilities (errors, logger)
+
+ml/               # Machine learning models and training
+├── models/       # ML model definitions
+├── services/     # Feature extraction
+└── training/     # Model training scripts
+
+alembic/          # Database migrations
+tests/            # Test suite
+```
+
+### File Organization
+- **One class per file** for models and major services
+- **Related functions** grouped in modules (e.g., `app/utils/errors.py`)
+- **Route handlers** organized by domain (claims, remits, episodes, risk)
+- **Shared logic** extracted to services, not duplicated in routes
+
+## Common Patterns
+
+### Error Handling
+- **Base exception**: Use `AppError` from `app.utils.errors` for all custom errors
+- **Error types**: Use specific error classes (`NotFoundError`, `ValidationError`, etc.)
+- **Error responses**: Return structured JSON with `message`, `code`, `status_code`, `details`
+- **Logging**: Always log errors with context using structured logging
+- **Example**:
+```python
+from app.utils.errors import NotFoundError, AppError
+
+if not resource:
+    raise NotFoundError("Resource", str(resource_id))
+
+try:
+    # operation
+except SpecificError as e:
+    logger.error("Operation failed", error=str(e), context=context_dict)
+    raise AppError("User-friendly message", status_code=500, details={"error": str(e)})
+```
+
+### Logging
+- **Logger**: Use `get_logger(__name__)` from `app.utils.logger` in all modules
+- **Structured logging**: Use keyword arguments for structured data (e.g., `logger.info("Event", key=value)`)
+- **Log levels**: 
+  - `DEBUG`: Detailed diagnostic info
+  - `INFO`: General informational messages
+  - `WARNING`: Warning messages (non-critical issues)
+  - `ERROR`: Error messages (operations failed)
+  - `CRITICAL`: Critical errors (system may be unstable)
+- **Context**: Include relevant context (IDs, filenames, user info) in log messages
+- **Example**:
+```python
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+logger.info("Processing claim", claim_id=claim_id, filename=filename)
+logger.error("Failed to process", error=str(e), claim_id=claim_id)
+```
+
+### Database Operations
+- **Session management**: Use `get_db()` dependency injection for route handlers
+- **Transactions**: Let FastAPI/SQLAlchemy handle transaction boundaries automatically
+- **Query patterns**: Use SQLAlchemy ORM, avoid raw SQL unless necessary
+- **Error handling**: Catch SQLAlchemy exceptions and convert to `AppError`
+- **Eager loading**: Use `joinedload()` or `selectinload()` for relationships to avoid N+1 queries
+- **Example**:
+```python
+from app.config.database import get_db
+from sqlalchemy.orm import Session, joinedload
+from app.models.database import Claim
+
+@router.get("/claims/{claim_id}")
+async def get_claim(claim_id: int, db: Session = Depends(get_db)):
+    claim = db.query(Claim).options(joinedload(Claim.claim_lines)).filter(Claim.id == claim_id).first()
+    if not claim:
+        raise NotFoundError("Claim", str(claim_id))
+    return claim
+```
+
+### Async/Await
+- **Route handlers**: Use `async def` for all route handlers (FastAPI best practice)
+- **Database calls**: Use async SQLAlchemy when available, otherwise sync is acceptable
+- **Celery tasks**: Use regular functions (Celery handles async internally)
+- **I/O operations**: Use `await` for async I/O (file reads, HTTP requests)
+- **Example**:
+```python
+@router.post("/claims/upload")
+async def upload_claim_file(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    content = await file.read()  # Async I/O
+    # Process...
+```
+
+### API Design
+- **Routers**: Use `APIRouter` from FastAPI, register in `app/main.py`
+- **Route prefix**: Use `/api/v1` prefix for all API routes
+- **Tags**: Use descriptive tags for OpenAPI grouping (e.g., `tags=["claims"]`)
+- **Response models**: Use Pydantic models for request/response validation
+- **Status codes**: Use appropriate HTTP status codes (200, 201, 400, 404, 500)
+- **Pagination**: Implement `skip` and `limit` parameters for list endpoints
+- **Example**:
+```python
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from app.config.database import get_db
+
+router = APIRouter()
+
+@router.get("/claims", tags=["claims"])
+async def get_claims(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    # Implementation
+```
+
+### Service Layer
+- **Business logic**: Keep route handlers thin, delegate to services
+- **Service location**: Place in `app/services/` organized by domain
+- **Dependencies**: Services can depend on other services, models, and utilities
+- **Stateless**: Services should be stateless (no instance variables)
+- **Example**:
+```python
+# app/services/risk/scorer.py
+def calculate_risk_score(claim: Claim, payer: Payer) -> RiskScore:
+    # Business logic here
+    pass
+
+# app/api/routes/risk.py
+from app.services.risk.scorer import calculate_risk_score
+
+@router.post("/risk/score")
+async def score_claim(claim_id: int, db: Session = Depends(get_db)):
+    claim = db.query(Claim).filter(Claim.id == claim_id).first()
+    score = calculate_risk_score(claim, claim.payer)
+    return score
+```
+
+### Celery Tasks
+- **Task location**: Define in `app/services/queue/tasks.py`
+- **Task decorator**: Use `@celery_app.task` (or `@app.task` if using app instance)
+- **Task naming**: Use descriptive names (e.g., `process_edi_file`)
+- **Error handling**: Log errors and use Celery retry mechanisms
+- **Result handling**: Return serializable data (dicts, primitives)
+- **Example**:
+```python
+from app.services.queue.tasks import celery_app
+
+@celery_app.task(bind=True, max_retries=3)
+def process_edi_file(self, file_content: str, filename: str, file_type: str):
+    try:
+        # Process file
+        return {"status": "success", "claim_id": claim_id}
+    except Exception as e:
+        logger.error("Task failed", error=str(e), filename=filename)
+        raise self.retry(exc=e, countdown=60)
+```
+
+## Testing
+
+### Test Structure
+- **Location**: All tests in `tests/` directory
+- **Naming**: Test files prefixed with `test_`, functions prefixed with `test_`
+- **Fixtures**: Use `pytest` fixtures in `tests/conftest.py` for shared setup
+- **Coverage**: Maintain minimum 80% code coverage (configured in `pyproject.toml`)
+
+### Test Patterns
+- **Unit tests**: Test individual functions/classes in isolation
+- **Integration tests**: Test API endpoints with test database
+- **Fixtures**: Use `factory-boy` for test data generation
+- **Database**: Use separate test database (SQLite in-memory for tests)
+- **Async tests**: Use `pytest-asyncio` for async route handlers
+- **Example**:
+```python
+import pytest
+from httpx import AsyncClient
+from app.main import app
+
+@pytest.mark.asyncio
+async def test_get_claim(test_db):
+    async with AsyncClient(app=app, base_url="http://test") as client:
+        response = await client.get("/api/v1/claims/1")
+        assert response.status_code == 200
+```
+
+### Definition of Done
+- **CRITICAL**: A task is considered "done" when ALL of the following criteria are met. Do NOT continue making changes once these are satisfied:
+  1. **All tests pass**: `pytest` runs successfully with no failures or errors
+  2. **No linter errors**: `ruff check .` returns no errors (warnings are acceptable if pre-existing)
+  3. **Code formatted**: `black .` has been run and code is properly formatted
+  4. **Coverage maintained**: Code coverage remains at or above 80% (no decrease from baseline)
+  5. **No new warnings**: No new deprecation warnings or runtime warnings introduced
+  6. **Tests are meaningful**: Tests verify actual functionality, not just that code runs without error
+  7. **Documentation updated**: If code changes affect behavior, documentation is updated (see Documentation section)
+  8. **No circular fixes**: If fixing one issue introduces another, stop and reassess approach rather than continuing to fix
+- **Stopping criteria**: Once all criteria above are met, STOP making changes. Do not:
+  - Refactor code that already works and passes tests
+  - Add "improvements" that weren't part of the original task
+  - Fix issues that are outside the scope of the current task
+  - Continue iterating on code that meets all definition of done criteria
+- **Exception handling**: If a task cannot meet all criteria due to external dependencies or known limitations, document the exception clearly in code comments or commit message
+
+## Security
+
+### Authentication & Authorization
+- **JWT tokens**: Use `python-jose` for JWT handling
+- **Password hashing**: Use `passlib[bcrypt]` for password hashing
+- **Middleware**: Use `AuthMiddleware` for protected routes
+- **Secrets**: Never commit secrets, use environment variables
+
+### Data Protection
+- **HIPAA compliance**: Log all access to PHI, encrypt sensitive data
+- **Audit logging**: Use `AuditMiddleware` for all API requests
+- **Input validation**: Use Pydantic models for all input validation
+- **SQL injection**: Use SQLAlchemy ORM (parameterized queries)
+
+## Performance
+
+### Database
+- **Connection pooling**: Configured in `app/config/database.py` (pool_size: 10, max_overflow: 20)
+- **Query optimization**: Use `joinedload()` to avoid N+1 queries
+- **Indexes**: Add database indexes for frequently queried columns
+- **Lazy loading**: Avoid lazy loading in loops, use eager loading
+
+### Caching
+- **Redis**: Use Redis for caching frequently accessed data
+- **Cache keys**: Use descriptive, namespaced keys (e.g., `claim:{id}`)
+- **TTL**: Set appropriate TTL for cached data
+
+### Async Processing
+- **Long-running tasks**: Use Celery for background processing (EDI parsing, ML inference)
+- **Task queuing**: Queue tasks instead of blocking request handlers
+- **WebSocket**: Use WebSocket for real-time notifications
+
+## Documentation
+
+### Documentation Update Requirement
+- **CRITICAL**: When code is touched, documentation MUST be updated and improved as part of the same change
+- **Update inline documentation**: Docstrings, comments, and type hints must reflect code changes
+- **Update API documentation**: `API_DOCUMENTATION.md` must be updated when endpoints are added, modified, or removed
+- **Update module documentation**: Module-level docstrings must be kept current with implementation
+- **Update project documentation**: README.md and other project docs should be updated when features change
+- **Documentation is not optional**: Treat documentation updates as part of the code change, not a separate task
+- **Examples**:
+  - Adding a new endpoint → Update `API_DOCUMENTATION.md` with endpoint details
+  - Modifying a service function → Update function docstring and module docstring if needed
+  - Adding a new model → Add comprehensive class docstring describing the model
+  - Changing behavior → Update relevant documentation to reflect the change
+
+### Code Documentation
+- **Module docstrings**: First line should be a brief summary, followed by detailed description
+- **Function docstrings**: Include description, parameters, return value, raises
+- **Class docstrings**: Include purpose, attributes, relationships, and usage examples
+- **Type hints**: Required for all function parameters and return types
+- **Example**:
+```python
+"""Module for claim processing services."""
+
+def process_claim(claim_id: int, db: Session) -> dict:
+    """
+    Process a claim and return results.
+    
+    Args:
+        claim_id: The ID of the claim to process
+        db: Database session
+        
+    Returns:
+        Dictionary containing processing results
+        
+    Raises:
+        NotFoundError: If claim not found
+        AppError: If processing fails
+    """
+```
+
+### API Documentation
+- **OpenAPI**: FastAPI auto-generates from route handlers
+- **Descriptions**: Add descriptive docstrings to route handlers
+- **Examples**: Include example request/response in docstrings when helpful
+- **Tags**: Use consistent tags for grouping in Swagger UI
+- **API_DOCUMENTATION.md**: Must be kept in sync with actual API endpoints
+  - Add new endpoints immediately when created
+  - Update endpoint documentation when behavior changes
+  - Remove documentation for deprecated endpoints
+  - Include request/response examples and error cases
+
+### Documentation References in Code
+- **Module docstrings**: Include "Documentation References" section linking to relevant docs
+- **Example pattern**:
+```python
+"""
+Module description.
+
+**Documentation References:**
+- API Docs: `API_DOCUMENTATION.md` → "Section Name"
+- Related Guide: `docs/guides/RELATED_GUIDE.md`
+- Quick Reference: `DOCUMENTATION_QUICK_REFERENCE.md` → "By Task" section
+"""
+```
+- **Quick Reference**: Use `DOCUMENTATION_QUICK_REFERENCE.md` to find docs by task, module, or topic
+- **Contributing**: See `CONTRIBUTING.md` for documentation guidelines and workflow
+
+## Migration & Database
+
+### Alembic Migrations
+- **Location**: `alembic/versions/`
+- **Naming**: Use descriptive names (e.g., `001_initial_schema.py`)
+- **Auto-generate**: Use `alembic revision --autogenerate -m "description"`
+- **Review**: Always review auto-generated migrations before applying
+- **Apply**: Use `alembic upgrade head` to apply migrations
+
+### Model Changes
+- **Base class**: All models inherit from `Base` (from `app.config.database`)
+- **Table names**: Use plural, snake_case (e.g., `claims`, `claim_lines`)
+- **Relationships**: Define relationships with `relationship()` and `back_populates`
+- **Timestamps**: Include `created_at` and `updated_at` DateTime columns with defaults
+
+## EDI Processing
+
+### Parser Patterns
+- **Resilience**: Handle missing segments gracefully, log warnings
+- **Extractors**: Use dedicated extractor classes in `app/services/edi/extractors/`
+- **Validation**: Validate extracted data before database insertion
+- **Logging**: Log parsing issues to `ParserLog` model for tracking
+- **Error recovery**: Continue processing when possible, mark incomplete claims
+
+## ML Integration
+
+### Model Usage
+- **Location**: Models in `ml/models/`, services in `ml/services/`
+- **Loading**: Load models at startup or lazily on first use
+- **Caching**: Cache model predictions when appropriate
+- **Async**: Run ML inference in Celery tasks for long-running predictions
+
+## General Principles
+
+### DRY (Don't Repeat Yourself)
+- **Extract common logic** to utility functions or services
+- **Reuse components** (error handlers, middleware, validators)
+- **Avoid duplication** of database queries, validation logic, or business rules
+- **Create abstractions** for repeated patterns
+
+### Efficiency
+- **Optimize database queries** (avoid N+1, use indexes, eager loading)
+- **Use async/await** for I/O-bound operations
+- **Queue long-running tasks** instead of blocking requests
+- **Cache expensive computations** and frequently accessed data
+- **Profile before optimizing** - measure, don't guess
+
+### Code Quality
+- **Write tests** for new features and bug fixes
+- **Keep functions small** and focused (single responsibility)
+- **Use meaningful names** for variables, functions, and classes
+- **Refactor regularly** to improve code quality
+- **Review code** before committing (self-review or peer review)

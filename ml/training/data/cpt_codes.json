@@ -1,0 +1,108 @@
+{
+  "cpt_by_specialty": {
+    "primary_care": [
+      ["99211", "Office visit, level 1", 50.0, 80.0, 0.15],
+      ["99212", "Office visit, level 2", 80.0, 120.0, 0.20],
+      ["99213", "Office visit, level 3", 120.0, 180.0, 0.35],
+      ["99214", "Office visit, level 4", 180.0, 280.0, 0.20],
+      ["99215", "Office visit, level 5", 280.0, 400.0, 0.10],
+      ["99201", "New patient, level 1", 80.0, 120.0, 0.05],
+      ["99202", "New patient, level 2", 120.0, 180.0, 0.10],
+      ["99203", "New patient, level 3", 180.0, 280.0, 0.15],
+      ["99204", "New patient, level 4", 280.0, 400.0, 0.08],
+      ["99205", "New patient, level 5", 400.0, 600.0, 0.02],
+      ["99391", "Preventive visit, 18-39", 150.0, 250.0, 0.10],
+      ["99392", "Preventive visit, 40-64", 200.0, 300.0, 0.12],
+      ["99393", "Preventive visit, 65+", 250.0, 350.0, 0.08],
+      ["80053", "Comprehensive metabolic panel", 40.0, 80.0, 0.25],
+      ["85025", "Complete blood count", 25.0, 50.0, 0.30],
+      ["80061", "Lipid panel", 30.0, 60.0, 0.20],
+      ["81001", "Urinalysis", 15.0, 30.0, 0.15],
+      ["36415", "Venipuncture", 10.0, 20.0, 0.40],
+      ["93000", "ECG", 40.0, 80.0, 0.15],
+      ["71020", "Chest X-ray", 80.0, 150.0, 0.10],
+      ["76700", "Abdominal ultrasound", 200.0, 400.0, 0.05]
+    ],
+    "cardiology": [
+      ["99213", "Office visit", 150.0, 250.0, 0.20],
+      ["99214", "Office visit", 200.0, 350.0, 0.30],
+      ["99215", "Office visit", 300.0, 500.0, 0.15],
+      ["93000", "ECG", 50.0, 100.0, 0.40],
+      ["93010", "ECG with interpretation", 80.0, 150.0, 0.25],
+      ["93306", "Echocardiogram", 400.0, 800.0, 0.30],
+      ["93307", "Echo with doppler", 500.0, 1000.0, 0.20],
+      ["93015", "Stress test", 300.0, 600.0, 0.15],
+      ["78452", "Nuclear stress test", 800.0, 1500.0, 0.10],
+      ["92920", "Angioplasty", 2000.0, 5000.0, 0.05],
+      ["92928", "Stent placement", 3000.0, 8000.0, 0.03]
+    ],
+    "orthopedics": [
+      ["99213", "Office visit", 150.0, 250.0, 0.25],
+      ["99214", "Office visit", 200.0, 350.0, 0.30],
+      ["99215", "Office visit", 300.0, 500.0, 0.15],
+      ["73060", "Knee X-ray", 80.0, 150.0, 0.20],
+      ["73070", "Hip X-ray", 80.0, 150.0, 0.15],
+      ["72040", "Spine X-ray", 100.0, 200.0, 0.20],
+      ["72141", "MRI spine", 800.0, 1500.0, 0.25],
+      ["73721", "MRI knee", 600.0, 1200.0, 0.20],
+      ["29881", "Knee arthroscopy", 2000.0, 5000.0, 0.10],
+      ["27447", "Knee replacement", 15000.0, 30000.0, 0.05],
+      ["27130", "Hip replacement", 20000.0, 40000.0, 0.03]
+    ],
+    "gastroenterology": [
+      ["99213", "Office visit", 150.0, 250.0, 0.20],
+      ["99214", "Office visit", 200.0, 350.0, 0.30],
+      ["45378", "Colonoscopy", 800.0, 2000.0, 0.40],
+      ["43239", "Upper endoscopy", 600.0, 1500.0, 0.30],
+      ["43235", "EGD with biopsy", 700.0, 1800.0, 0.25],
+      ["76700", "Abdominal ultrasound", 200.0, 400.0, 0.15],
+      ["74177", "CT abdomen", 400.0, 800.0, 0.20]
+    ],
+    "dermatology": [
+      ["99213", "Office visit", 120.0, 200.0, 0.25],
+      ["99214", "Office visit", 180.0, 300.0, 0.35],
+      ["11300", "Shave removal", 100.0, 200.0, 0.20],
+      ["11400", "Excision benign", 200.0, 400.0, 0.15],
+      ["17000", "Destruction lesion", 150.0, 300.0, 0.20],
+      ["17003", "Destruction multiple", 300.0, 600.0, 0.10],
+      ["11104", "Punch biopsy", 200.0, 400.0, 0.15]
+    ],
+    "urology": [
+      ["99213", "Office visit", 150.0, 250.0, 0.20],
+      ["99214", "Office visit", 200.0, 350.0, 0.30],
+      ["52000", "Cystoscopy", 500.0, 1000.0, 0.25],
+      ["76770", "Prostate ultrasound", 300.0, 600.0, 0.20],
+      ["55866", "Prostate biopsy", 800.0, 1500.0, 0.15],
+      ["52601", "TURP", 3000.0, 6000.0, 0.10]
+    ],
+    "oncology": [
+      ["99214", "Office visit", 250.0, 400.0, 0.30],
+      ["99215", "Office visit", 350.0, 600.0, 0.25],
+      ["96413", "Chemotherapy", 500.0, 1500.0, 0.40],
+      ["77334", "Radiation therapy", 1000.0, 3000.0, 0.30],
+      ["88104", "Cytopathology", 200.0, 400.0, 0.20],
+      ["88305", "Surgical pathology", 150.0, 300.0, 0.25]
+    ],
+    "emergency": [
+      ["99281", "ER level 1", 200.0, 400.0, 0.05],
+      ["99282", "ER level 2", 300.0, 600.0, 0.10],
+      ["99283", "ER level 3", 500.0, 1000.0, 0.30],
+      ["99284", "ER level 4", 800.0, 1500.0, 0.35],
+      ["99285", "ER level 5", 1200.0, 2500.0, 0.20],
+      ["36415", "IV placement", 50.0, 100.0, 0.40],
+      ["71020", "Chest X-ray", 100.0, 200.0, 0.30],
+      ["70450", "CT head", 400.0, 800.0, 0.25]
+    ]
+  },
+  "specialty_weights": {
+    "primary_care": 0.35,
+    "cardiology": 0.12,
+    "orthopedics": 0.10,
+    "gastroenterology": 0.08,
+    "dermatology": 0.08,
+    "urology": 0.07,
+    "oncology": 0.05,
+    "emergency": 0.15
+  }
+}
+

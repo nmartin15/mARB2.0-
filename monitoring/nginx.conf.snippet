@@ -1,0 +1,14 @@
+
+# Add this to your nginx configuration to serve the monitoring dashboard
+location /monitoring {
+    alias /Users/nathanmartinez/CursorProjects/mARB 2.0/monitoring;
+    index dashboard.html;
+    
+    # Optional: Add basic authentication for production
+    # auth_basic "Monitoring Dashboard";
+    # auth_basic_user_file /etc/nginx/.htpasswd;
+    
+    # Optional: Restrict access to specific IPs
+    # allow 192.168.1.0/24;
+    # deny all;
+}

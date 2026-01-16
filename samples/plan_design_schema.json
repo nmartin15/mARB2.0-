@@ -1,0 +1,516 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/plan_design_schema.json",
+  "title": "Health Plan Design Schema",
+  "description": "Schema for defining health insurance plan designs including deductibles, copays, coinsurance, benefits, and coverage rules",
+  "type": "object",
+  "required": ["plan_name", "plan_type", "effective_date", "termination_date"],
+  "properties": {
+    "plan_name": {
+      "type": "string",
+      "description": "Name of the health insurance plan"
+    },
+    "plan_type": {
+      "type": "string",
+      "enum": ["PPO", "HMO", "EPO", "POS", "HDHP"],
+      "description": "Type of health insurance plan"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Plan effective start date (YYYY-MM-DD)"
+    },
+    "termination_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Plan termination date (YYYY-MM-DD)"
+    },
+    "deductibles": {
+      "type": "object",
+      "required": ["individual", "family"],
+      "properties": {
+        "individual": {
+          "type": "object",
+          "required": ["in_network", "out_of_network"],
+          "properties": {
+            "in_network": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Individual in-network deductible amount"
+            },
+            "out_of_network": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Individual out-of-network deductible amount"
+            },
+            "applies_to": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["medical", "pharmacy", "dental", "vision"]
+              },
+              "description": "Services to which deductible applies"
+            }
+          }
+        },
+        "family": {
+          "type": "object",
+          "required": ["in_network", "out_of_network"],
+          "properties": {
+            "in_network": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Family in-network deductible amount"
+            },
+            "out_of_network": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Family out-of-network deductible amount"
+            },
+            "applies_to": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["medical", "pharmacy", "dental", "vision"]
+              }
+            }
+          }
+        },
+        "embedded": {
+          "type": "boolean",
+          "description": "Whether deductible is embedded (individual deductible applies within family)"
+        },
+        "carry_over": {
+          "type": "boolean",
+          "description": "Whether unused deductible amounts carry over to next year"
+        }
+      }
+    },
+    "out_of_pocket_maximums": {
+      "type": "object",
+      "required": ["individual", "family"],
+      "properties": {
+        "individual": {
+          "type": "object",
+          "required": ["in_network", "out_of_network"],
+          "properties": {
+            "in_network": {
+              "type": "number",
+              "minimum": 0
+            },
+            "out_of_network": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "family": {
+          "type": "object",
+          "required": ["in_network", "out_of_network"],
+          "properties": {
+            "in_network": {
+              "type": "number",
+              "minimum": 0
+            },
+            "out_of_network": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "includes_deductible": {
+          "type": "boolean",
+          "description": "Whether deductible counts toward out-of-pocket maximum"
+        }
+      }
+    },
+    "copays": {
+      "type": "object",
+      "properties": {
+        "primary_care_visit": {
+          "type": "object",
+          "properties": {
+            "in_network": {"type": "number", "minimum": 0},
+            "out_of_network": {"type": "number", "minimum": 0},
+            "applies_after_deductible": {"type": "boolean"}
+          }
+        },
+        "specialist_visit": {
+          "type": "object",
+          "properties": {
+            "in_network": {"type": "number", "minimum": 0},
+            "out_of_network": {"type": "number", "minimum": 0},
+            "applies_after_deductible": {"type": "boolean"}
+          }
+        },
+        "urgent_care": {
+          "type": "object",
+          "properties": {
+            "in_network": {"type": "number", "minimum": 0},
+            "out_of_network": {"type": "number", "minimum": 0},
+            "applies_after_deductible": {"type": "boolean"}
+          }
+        },
+        "emergency_room": {
+          "type": "object",
+          "properties": {
+            "in_network": {"type": "number", "minimum": 0},
+            "out_of_network": {"type": "number", "minimum": 0},
+            "applies_after_deductible": {"type": "boolean"},
+            "waived_if_admitted": {"type": "boolean"}
+          }
+        },
+        "pharmacy": {
+          "type": "object",
+          "properties": {
+            "generic": {
+              "type": "object",
+              "properties": {
+                "in_network": {"type": "number", "minimum": 0},
+                "out_of_network": {"type": "number", "minimum": 0}
+              }
+            },
+            "preferred_brand": {
+              "type": "object",
+              "properties": {
+                "in_network": {"type": "number", "minimum": 0},
+                "out_of_network": {"type": "number", "minimum": 0}
+              }
+            },
+            "non_preferred_brand": {
+              "type": "object",
+              "properties": {
+                "in_network": {"type": "number", "minimum": 0},
+                "out_of_network": {"type": "number", "minimum": 0}
+              }
+            },
+            "specialty": {
+              "type": "object",
+              "properties": {
+                "in_network": {"type": "number", "minimum": 0},
+                "out_of_network": {"type": "number", "minimum": 0}
+              }
+            }
+          }
+        }
+      }
+    },
+    "coinsurance": {
+      "type": "object",
+      "properties": {
+        "medical": {
+          "type": "object",
+          "properties": {
+            "in_network": {
+              "type": "object",
+              "properties": {
+                "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+                "applies_after_deductible": {"type": "boolean"}
+              }
+            },
+            "out_of_network": {
+              "type": "object",
+              "properties": {
+                "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+                "applies_after_deductible": {"type": "boolean"}
+              }
+            }
+          }
+        },
+        "pharmacy": {
+          "type": "object",
+          "properties": {
+            "in_network": {
+              "type": "object",
+              "properties": {
+                "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+                "applies_after_deductible": {"type": "boolean"}
+              }
+            },
+            "out_of_network": {
+              "type": "object",
+              "properties": {
+                "percentage": {"type": "number", "minimum": 0, "maximum": 100},
+                "applies_after_deductible": {"type": "boolean"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "benefit_limits": {
+      "type": "object",
+      "properties": {
+        "annual": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "limit": {"type": ["number", "integer"], "minimum": 0},
+              "requires_prior_auth_after": {"type": ["number", "integer"], "minimum": 0}
+            }
+          }
+        },
+        "lifetime": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "limit": {"type": "number", "minimum": 0},
+              "currency": {
+                "type": "string",
+                "enum": ["USD", "EUR", "GBP", "CAD", "AUD"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "prior_authorization_requirements": {
+      "type": "object",
+      "properties": {
+        "always_required": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "service_type": {"type": "string"},
+              "cpt_codes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "ndc_codes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "modalities": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "required_after_visits": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "visits": {"type": "integer", "minimum": 0},
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "required_for_amounts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "amount": {"type": "number", "minimum": 0},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "network_rules": {
+      "type": "object",
+      "properties": {
+        "in_network": {
+          "type": "object",
+          "properties": {
+            "discount_applied": {"type": "boolean"},
+            "coinsurance_percentage": {"type": "number", "minimum": 0, "maximum": 100},
+            "deductible_applies": {"type": "boolean"}
+          }
+        },
+        "out_of_network": {
+          "type": "object",
+          "properties": {
+            "discount_applied": {"type": "boolean"},
+            "coinsurance_percentage": {"type": "number", "minimum": 0, "maximum": 100},
+            "deductible_applies": {"type": "boolean"},
+            "balance_billing_allowed": {"type": "boolean"},
+            "max_allowed_amount": {
+              "type": "string",
+              "enum": ["UCR", "R&C", "Fee Schedule"]
+            }
+          }
+        },
+        "emergency_services": {
+          "type": "object",
+          "properties": {
+            "always_in_network": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "coverage_rules": {
+      "type": "object",
+      "properties": {
+        "preventive_care": {
+          "type": "object",
+          "properties": {
+            "covered_at_100": {"type": "boolean"},
+            "applies_to_deductible": {"type": "boolean"},
+            "services": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "maternity": {
+          "type": "object",
+          "properties": {
+            "covered": {"type": "boolean"},
+            "copay": {"type": "number", "minimum": 0},
+            "coinsurance": {"type": "number", "minimum": 0, "maximum": 100},
+            "applies_to_deductible": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        },
+        "mental_health": {
+          "type": "object",
+          "properties": {
+            "parity": {"type": "boolean"},
+            "copay": {"type": "number", "minimum": 0},
+            "coinsurance": {"type": "number", "minimum": 0, "maximum": 100},
+            "description": {"type": "string"}
+          }
+        },
+        "substance_abuse": {
+          "type": "object",
+          "properties": {
+            "parity": {"type": "boolean"},
+            "copay": {"type": "number", "minimum": 0},
+            "coinsurance": {"type": "number", "minimum": 0, "maximum": 100},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "category": {"type": "string"},
+          "description": {"type": "string"},
+          "cpt_codes": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "exceptions": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      }
+    },
+    "cpt_code_rules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": {"type": "string"},
+          "allowed_amount_in_network": {"type": "number", "minimum": 0},
+          "allowed_amount_out_network": {"type": "number", "minimum": 0},
+          "requires_prior_auth": {"type": "boolean"},
+          "frequency_limit": {
+            "type": ["object", "null"],
+            "properties": {
+              "per_year": {"type": "integer", "minimum": 0},
+              "description": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "denial_reason_codes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "code": {"type": "string"},
+          "description": {"type": "string"},
+          "category": {
+            "type": "string",
+            "enum": ["contractual_obligation", "patient_responsibility", "other_adjustment"]
+          },
+          "action_required": {"type": "string"},
+          "appealable": {"type": "boolean"}
+        }
+      }
+    },
+    "claim_processing_rules": {
+      "type": "object",
+      "properties": {
+        "timely_filing": {
+          "type": "object",
+          "properties": {
+            "days": {"type": "integer", "minimum": 0},
+            "description": {"type": "string"}
+          }
+        },
+        "coordination_of_benefits": {
+          "type": "object",
+          "properties": {
+            "primary": {"type": "boolean"},
+            "secondary_allowed": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        },
+        "retroactive_authorization": {
+          "type": "object",
+          "properties": {
+            "allowed": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        },
+        "claim_edits": {
+          "type": "object",
+          "properties": {
+            "duplicate_claim_detection": {"type": "boolean"},
+            "bundling_rules": {"type": "string"},
+            "unbundling_detection": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "special_programs": {
+      "type": "object",
+      "properties": {
+        "disease_management": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "enrolled": {"type": "boolean"},
+              "copay_waiver": {"type": "boolean"},
+              "description": {"type": "string"}
+            }
+          }
+        },
+        "value_based_care": {
+          "type": "object",
+          "properties": {
+            "participating_providers": {"type": "boolean"},
+            "incentive_programs": {"type": "boolean"},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "appeals_process": {
+      "type": "object",
+      "properties": {
+        "internal_appeal_days": {"type": "integer", "minimum": 0},
+        "external_appeal_available": {"type": "boolean"},
+        "expedited_appeal_available": {"type": "boolean"},
+        "description": {"type": "string"}
+      }
+    }
+  }
+}

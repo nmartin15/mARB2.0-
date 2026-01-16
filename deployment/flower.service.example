@@ -1,0 +1,28 @@
+# Systemd service file for Flower (Celery monitoring)
+# Place in /etc/systemd/system/marb2.0-flower.service
+
+[Unit]
+Description=mARB 2.0 Celery Flower (Monitoring)
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=marb
+Group=marb
+WorkingDirectory=/opt/marb2.0
+Environment="PATH=/opt/marb2.0/venv/bin"
+ExecStart=/opt/marb2.0/venv/bin/celery -A app.services.queue.tasks flower --port=5555 --broker=redis://localhost:6379/0
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+# To enable and start:
+# sudo systemctl daemon-reload
+# sudo systemctl enable marb2.0-flower.service
+# sudo systemctl start marb2.0-flower.service
+#
+# Access at: http://your-server-ip:5555
+# For production, configure nginx to proxy this endpoint with authentication
+
